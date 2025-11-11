@@ -113,7 +113,39 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
+        int size = board.size();
+        board.startViewingFrom(side);
+        for (int col = 0; col < size; col++)
+        {
+            boolean[] merged = new boolean[size];
+            for (int row = size - 2; row >= 0; row--)
+            {
+                Tile tile = board.tile(col, row);
+                if (tile == null) continue;
+                int targetrow = row;
+                while (targetrow + 1 < size && board.tile(col, targetrow+1) == null )
+                {
+                    targetrow++;
+                }
+                if (targetrow + 1 < size)
+                {
+                    Tile above = board.tile(col, targetrow + 1);
+                    if (above.value() == tile.value() && !merged[targetrow + 1]) {
+                        merged[targetrow + 1] = true;
+                        board.move(col, targetrow + 1, tile);
+                        score += tile.value() * 2;
+                        changed = true;
+                        continue;
+                    }
+                }
+                if (targetrow != row)
+                {
+                    board.move(col, targetrow, tile);
+                    changed = true;
+                }
+            }
+        }
+        board.startViewingFrom(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
@@ -183,20 +215,29 @@ public class Model extends Observable {
     //我宣布个事我是个傻逼
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
-        int boardlength = b.size();
-        for (int col = 0; col < boardlength; col++)
-        {
-            for (int row = 0; row < boardlength; row++)
-            {
-                if (b.tile(col, row) == null) return true;
-                int NowTileValue = b.tile(col, row).value();
-                if (col > 0 && b.tile(col-1, row).value() == NowTileValue)
+        int N = b.size();
+
+        // 如果有空格，肯定有可移动
+        for (int col = 0; col < N; col++) {
+            for (int row = 0; row < N; row++) {
+                Tile t = b.tile(col, row);
+                if (t == null) {
                     return true;
-                else if (col < boardlength-1 && b.tile(col+1,row).value() == NowTileValue)
+                }
+            }
+        }
+
+        // 如果有相邻相同的 tile，也能移动
+        for (int col = 0; col < N; col++) {
+            for (int row = 0; row < N; row++) {
+                Tile t = b.tile(col, row);
+                int value = t.value();
+
+                // 检查右边
+                if (col + 1 < N && b.tile(col + 1, row).value() == value)
                     return true;
-                else if (row > 0 && b.tile(col, row-1).value() == NowTileValue)
-                    return true;
-                else if (row < boardlength-1 && b.tile(col, row +1).value() == NowTileValue)
+                // 检查上方
+                if (row + 1 < N && b.tile(col, row + 1).value() == value)
                     return true;
             }
         }
