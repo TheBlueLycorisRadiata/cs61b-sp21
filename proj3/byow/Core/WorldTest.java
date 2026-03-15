@@ -6,7 +6,7 @@ import byow.TileEngine.TETile;
 public class WorldTest {
     public static void main(String[] args)
     {
-        World newWorld = World.generateWorld(50,50,867);
+        World newWorld = World.generateWorld(50,50,8267);
         TETile[][] world = newWorld.getWorld();
 
         TERenderer ter = new TERenderer(newWorld.getWIDTH(), newWorld.getHEIGHT());
